@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: "flight";
+    src: url("/fonts/static/Jost-Light.ttf");
+  }
+
+:root{
+  --c1:#80471c;
+
+}
