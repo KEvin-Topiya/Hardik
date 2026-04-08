@@ -17,24 +17,24 @@ import (
 
 // Models
 type Product struct {
-	ID          int    `json:"id" db:"id"`
-	Name        string `json:"name" db:"name"`
-	Price       int    `json:"price" db:"price"`
-	Category    string `json:"category" db:"category"`
-	Material    string `json:"material" db:"material"`
-	Description string `json:"description" db:"description"`
-	Weight      string `json:"weight" db:"weight"`
-	Dimensions  string `json:"dimensions" db:"dimensions"`
-	Finish      string `json:"finish" db:"finish"`
-	Stone       string `json:"stone" db:"stone"`
+	ID          int     `json:"id" db:"id"`
+	Name        string  `json:"name" db:"name"`
+	Price       int     `json:"price" db:"price"`
+	Category    string  `json:"category" db:"category"`
+	Material    string  `json:"material" db:"material"`
+	Description string  `json:"description" db:"description"`
+	Weight      string  `json:"weight" db:"weight"`
+	Dimensions  string  `json:"dimensions" db:"dimensions"`
+	Finish      string  `json:"finish" db:"finish"`
+	Stone       string  `json:"stone" db:"stone"`
 	ImageURL    *string `json:"image_url" db:"image_url"`
-	CreatedAt   string `json:"created_at" db:"created_at"`
+	CreatedAt   string  `json:"created_at" db:"created_at"`
 }
 
 type OrderRequest struct {
-	CustomerName  string       `json:"customer_name"`
-	CustomerEmail string       `json:"customer_email"`
-	Items         []OrderItem  `json:"items"`
+	CustomerName  string      `json:"customer_name"`
+	CustomerEmail string      `json:"customer_email"`
+	Items         []OrderItem `json:"items"`
 }
 
 type OrderItem struct {
@@ -87,7 +87,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:3000"},
+		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -108,7 +108,7 @@ func main() {
 	}
 
 	fmt.Printf("Server starting on port %s...\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	log.Fatal(http.ListenAndServe("127.0.0.1:"+port, r))
 }
 
 func (app *App) getProducts(w http.ResponseWriter, r *http.Request) {
@@ -164,7 +164,7 @@ func (app *App) createOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var orderID int
-	err = tx.QueryRow("INSERT INTO orders (customer_name, customer_email, total_amount) VALUES ($1, $2, $3) RETURNING id", 
+	err = tx.QueryRow("INSERT INTO orders (customer_name, customer_email, total_amount) VALUES ($1, $2, $3) RETURNING id",
 		req.CustomerName, req.CustomerEmail, total).Scan(&orderID)
 	if err != nil {
 		log.Printf("Error inserting order: %v", err)
