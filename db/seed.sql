@@ -1,0 +1,17 @@
+-- Initial Data for Meridian Jewelry (PostgreSQL)
+-- TRUNCATE to avoid primary key collisions if re-running
+TRUNCATE TABLE order_items RESTART IDENTITY CASCADE;
+TRUNCATE TABLE orders RESTART IDENTITY CASCADE;
+TRUNCATE TABLE products RESTART IDENTITY CASCADE;
+
+INSERT INTO products (name, price, category, material, description, weight, dimensions, finish, stone, image_url) VALUES 
+('Platinum Meridian Band', 2450, 'Rings', '950 Platinum', 'A continuous loop of pure platinum, featuring our signature Meridian bevel. Designed for those who appreciate the weight of precision.', '12g', '6mm width', 'Brushed Satin', 'None', 'https://images.unsplash.com/photo-1605100804763-247f66122eff?auto=format&fit=crop&w=800&q=80'),
+('Diamond Solitaire Studs', 3800, 'Earrings', '18k White Gold', 'Architectural bezel setting holding brilliant-cut diamonds. Minimalist perfection for everyday elegance.', '2g', '5mm diameter', 'High Polish', 'VS1 Diamond, 1.0ct tw', 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80'),
+('Silver Geometric Chain', 890, 'Necklaces', 'Sterling Silver', 'Interlocking geometric links inspired by brutalist architecture. A statement piece of structural integrity.', '45g', '20 inch length', 'Oxidized Matte', 'None', 'https://images.unsplash.com/photo-1599643478514-4a42ba899539?auto=format&fit=crop&w=800&q=80'),
+('Platinum Signet Ring', 1950, 'Rings', '950 Platinum', 'A modern interpretation of the classic signet. Flat top surface ready for engraving or left pristine.', '18g', '14mm face', 'Polished', 'None', 'https://images.unsplash.com/photo-1599643477873-611fffcff9eb?auto=format&fit=crop&w=800&q=80'),
+('Ice Diamond Pendant', 4200, 'Necklaces', '18k White Gold', 'A suspended geometric form holding a rare ice-blue diamond. The chain disappears, leaving only light.', '5g', '18 inch chain', 'Rhodium Plated', 'Blue Diamond, 0.75ct', 'https://images.unsplash.com/photo-1599643476214-7cecb1e8b4e7?auto=format&fit=crop&w=800&q=80'),
+('Silver Cuff Bracelet', 1100, 'Bracelets', 'Sterling Silver', 'Forged from a single bar of silver. The tension of the curve holds it in place. Pure structural form.', '32g', '6.5 inch circumference', 'Hammered', 'None', 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=800&q=80'),
+('Platinum Hoop Earrings', 2100, 'Earrings', '950 Platinum', 'Perfect circles of platinum. The hinge mechanism is hidden to maintain the continuous line.', '8g', '25mm diameter', 'High Polish', 'None', 'https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=800&q=80'),
+('Diamond Tennis Bracelet', 6500, 'Bracelets', '18k White Gold', 'A flexible line of light. Each diamond is set in a minimal four-prong architectural basket.', '15g', '7 inch length', 'Polished', 'VS1 Diamonds, 3.0ct tw', 'https://images.unsplash.com/photo-1599643474163-125acb415aef?auto=format&fit=crop&w=800&q=80'),
+('Silver Link Necklace', 780, 'Necklaces', 'Sterling Silver', 'Oval links flattened and polished to catch light from every angle. Industrial yet refined.', '28g', '22 inch length', 'High Polish', 'None', 'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=800&q=80'),
+('Platinum Wedding Band', 3200, 'Rings', '950 Platinum', 'The classic band, elevated. Slightly domed interior for comfort, sharp edges for definition.', '14g', '5mm width', 'Brushed', 'None', 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=800&q=80');

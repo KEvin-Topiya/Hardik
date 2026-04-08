@@ -1,0 +1,83 @@
+# =========================
+# General
+# =========================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+.vscode/
+.idea/
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Go (backend)
+# =========================
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output folders
+bin/
+dist/
+build/
+
+# Go workspace
+go.work
+go.work.sum
+
+# Vendor (optional - remove if you commit vendor)
+vendor/
+
+# =========================
+# Node / Svelte (frontend)
+# =========================
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# SvelteKit / Vite build outputs
+.svelte-kit/
+build/
+dist/
+
+# Vite cache
+.vite/
+
+# =========================
+# Public / Static (optional)
+# =========================
+# Uncomment if you generate files here
+# public/build/
+# public/dist/
+
+# =========================
+# Logs
+# =========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Coverage
+# =========================
+coverage/
+
+# =========================
+# OS / Misc
+# =========================
+*.bak
+*.old
