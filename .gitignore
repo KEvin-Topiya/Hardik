@@ -31,7 +31,7 @@ Thumbs.db
 
 # Output folders
 bin/
-dist/
+
 build/
 
 # Go workspace
@@ -52,7 +52,7 @@ pnpm-lock.yaml
 # SvelteKit / Vite build outputs
 .svelte-kit/
 build/
-dist/
+
 
 # Vite cache
 .vite/
