@@ -2,7 +2,14 @@
   import { Diamond, ShieldCheck, Ruler, Fingerprint } from 'lucide-svelte';
   import { fade, fly } from 'svelte/transition';
   import AnimatedCounter from '../components/AnimatedCounter.svelte';
+  import SEO from '../components/SEO.svelte';
 </script>
+
+<SEO 
+  title="About Our Heritage | Aarti Abhushan" 
+  description="Discover the story of Aarti Abhushan. Our heritage of fine craftsmanship and commitment to quality in every jewelry piece."
+  keywords="about Aarti Abhushan, jewelry brand history, craftsmanship, jewelry designers, authentic jewelry India"
+/>
 
 <div class="min-h-screen bg-[#FFFCF9] pb-24" in:fade>
   <!-- Hero -->

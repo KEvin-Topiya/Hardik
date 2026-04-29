@@ -3,12 +3,17 @@
   import { ArrowLeft, Diamond, ShoppingCart, Check, Info } from 'lucide-svelte';
   import { addToCart } from '../lib/cart';
   import { fade, fly } from 'svelte/transition';
+  import SEO from '../components/SEO.svelte';
 
   export let product;
   const dispatch = createEventDispatcher();
   
   let quantity = 1;
   let added = false;
+  let currentImageIndex = 0;
+
+  $: images = product.images || [];
+  $: activeImage = images[currentImageIndex] || null;
 
   function handleBack() {
     dispatch('back');
@@ -25,6 +30,12 @@
   }
 </script>
 
+<SEO 
+  title="{product.name} | Aarti Abhushan" 
+  description={product.description}
+  keywords="{product.name}, {product.category}, {product.material}, jewelry, Aarti Abhushan"
+/>
+
 <div class="min-h-screen bg-[#FFFCF9] pb-24" in:fade>
   <div class="max-w-7xl mx-auto px-4 py-8">
     <button 
@@ -37,27 +48,44 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
       <!-- Image / Form Section -->
-      <div 
-        class="aspect-[4/5] bg-[#F5F0EB] border border-[#DDD5CC] rounded-sm relative flex items-center justify-center overflow-hidden"
-        in:fly={{ x: -20, duration: 600 }}
-      >
-        {#if product.image_url}
-          <img src={product.image_url} alt={product.name} class="w-full h-full object-cover" />
-        {:else}
-          <div class="absolute inset-0 z-0 opacity-20">
-             <div class="w-full h-full border-[100px] border-[#3D3229] rounded-full scale-150 transform -translate-x-1/2 -translate-y-1/2 absolute top-0 left-0" />
-          </div>
+      <div class="flex flex-col space-y-4">
+        <!-- Main Image -->
+        <div 
+          class="aspect-[4/5] bg-[#F5F0EB] border border-[#DDD5CC] rounded-sm relative flex items-center justify-center overflow-hidden"
+          in:fly={{ x: -20, duration: 600 }}
+        >
+          {#if activeImage}
+            <img src={activeImage} alt={product.name} class="w-full h-full object-cover transition-all duration-300" />
+          {:else}
+            <div class="absolute inset-0 z-0 opacity-20">
+               <div class="w-full h-full border-[100px] border-[#3D3229] rounded-full scale-150 transform -translate-x-1/2 -translate-y-1/2 absolute top-0 left-0" />
+            </div>
+            
+            <div class="relative z-10 p-12 text-center space-y-8">
+               <div class="mx-auto w-32 h-32 sm:w-64 sm:h-64 border border-[#C9BDB0] rounded-full flex items-center justify-center">
+                 <div class="w-24 h-24 sm:w-48 sm:h-48 border border-[#C9BDB0] rotate-45 transform scale-75 animate-pulse" />
+               </div>
+            </div>
+          {/if}
           
-          <div class="relative z-10 p-12 text-center space-y-8">
-             <div class="mx-auto w-32 h-32 sm:w-64 sm:h-64 border border-[#C9BDB0] rounded-full flex items-center justify-center">
-               <div class="w-24 h-24 sm:w-48 sm:h-48 border border-[#C9BDB0] rotate-45 transform scale-75 animate-pulse" />
-             </div>
+          <div class="absolute bottom-12 inset-x-0 text-center">
+            <p class="text-[10px] uppercase font-bold tracking-[0.4em] text-[#8B7D6B]">Reference: FR-00{product.id}</p>
+          </div>
+        </div>
+
+        <!-- Thumbnails -->
+        {#if images.length > 1}
+          <div class="flex space-x-4 overflow-x-auto pb-2">
+            {#each images as img, i}
+              <button 
+                on:click={() => currentImageIndex = i}
+                class="w-20 h-24 flex-shrink-0 border {currentImageIndex === i ? 'border-[#3D3229]' : 'border-[#DDD5CC] opacity-60 hover:opacity-100'} transition-all overflow-hidden rounded-sm bg-[#F5F0EB]"
+              >
+                <img src={img} alt="{product.name} view {i + 1}" class="w-full h-full object-cover" />
+              </button>
+            {/each}
           </div>
         {/if}
-        
-        <div class="absolute bottom-12 inset-x-0 text-center">
-          <p class="text-[10px] uppercase font-bold tracking-[0.4em] text-[#8B7D6B]">Reference: FR-00{product.id}</p>
-        </div>
       </div>
 
       <!-- Content Section -->

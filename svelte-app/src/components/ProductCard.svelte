@@ -18,8 +18,8 @@
   class="group cursor-pointer"
 >
   <div class="relative aspect-[1/1] sm:aspect-[4/5] overflow-hidden bg-[#F5F0EB] border border-[#DDD5CC] mb-2 sm:mb-4 rounded-sm transition-all duration-500 group-hover:border-[#C9BDB0]">
-    {#if product.image_url}
-      <img src={product.image_url} alt={product.name} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+    {#if product.images && product.images.length > 0}
+      <img src={product.images[0]} alt={product.name} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
     {:else}
       <!-- Geometric Placeholder Art -->
       <div class="absolute inset-0 w-full h-full bg-[radial-gradient(circle_at_center,_#FFE8D6_0%,_#F5F0EB_100%)] opacity-50 transition-transform duration-700 group-hover:scale-105" />

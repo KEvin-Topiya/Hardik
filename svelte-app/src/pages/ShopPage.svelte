@@ -4,6 +4,7 @@
   import ProductCard from '../components/ProductCard.svelte';
   import { getProducts } from '../services/api';
   import { fade, fly } from 'svelte/transition';
+  import SEO from '../components/SEO.svelte';
 
   const dispatch = createEventDispatcher();
   
@@ -43,6 +44,12 @@
     dispatch('productClick', product);
   }
 </script>
+
+<SEO 
+  title="Shop Collection | Aarti Abhushan" 
+  description="Browse our complete collection of rings, necklaces, earrings, and bracelets. Find the perfect piece for your next milestone."
+  keywords="jewelry shop, buy gold jewelry, diamond rings collection, silver ornaments, Aarti Abhushan shop"
+/>
 
 <div class="min-h-screen bg-[#FFFCF9] pb-24">
   <div class="bg-[#F5F0EB] border-b border-[#DDD5CC] py-12 px-4 shadow-sm">

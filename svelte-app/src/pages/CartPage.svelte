@@ -4,6 +4,7 @@
   import { cart, removeFromCart, updateQuantity, clearCart } from '../lib/cart';
   import { sendWhatsAppOrder } from '../lib/whatsapp';
   import { fade, fly } from 'svelte/transition';
+  import SEO from '../components/SEO.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -19,6 +20,12 @@
     sendWhatsAppOrder(cartItems, cartTotal);
   }
 </script>
+
+<SEO 
+  title="Your Collection | Aarti Abhushan" 
+  description="Review the exquisite pieces in your collection and proceed to acquire them via direct studio contact."
+  keywords="jewelry cart, checkout jewelry, Aarti Abhushan order, luxury jewelry shopping"
+/>
 
 <div class="min-h-screen bg-[#FFFCF9] pb-24">
   <div class="bg-[#F5F0EB] border-b border-[#DDD5CC] py-12 px-4 shadow-sm">
