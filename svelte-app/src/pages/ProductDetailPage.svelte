@@ -3,6 +3,7 @@
   import { ArrowLeft, Diamond, ShoppingCart, Check, Info } from 'lucide-svelte';
   import { addToCart } from '../lib/cart';
   import { fade, fly } from 'svelte/transition';
+  import { IMAGE_BASE_URL, getImageUrl } from '../services/api';
   import SEO from '../components/SEO.svelte';
 
   export let product;
@@ -55,7 +56,7 @@
           in:fly={{ x: -20, duration: 600 }}
         >
           {#if activeImage}
-            <img src={activeImage} alt={product.name} class="w-full h-full object-cover transition-all duration-300" />
+            <img src={getImageUrl(activeImage)} alt={product.name} class="w-full h-full object-cover transition-all duration-300" />
           {:else}
             <div class="absolute inset-0 z-0 opacity-20">
                <div class="w-full h-full border-[100px] border-[#3D3229] rounded-full scale-150 transform -translate-x-1/2 -translate-y-1/2 absolute top-0 left-0" />
@@ -68,9 +69,6 @@
             </div>
           {/if}
           
-          <div class="absolute bottom-12 inset-x-0 text-center">
-            <p class="text-[10px] uppercase font-bold tracking-[0.4em] text-[#8B7D6B]">Reference: FR-00{product.id}</p>
-          </div>
         </div>
 
         <!-- Thumbnails -->
@@ -81,7 +79,7 @@
                 on:click={() => currentImageIndex = i}
                 class="w-20 h-24 flex-shrink-0 border {currentImageIndex === i ? 'border-[#3D3229]' : 'border-[#DDD5CC] opacity-60 hover:opacity-100'} transition-all overflow-hidden rounded-sm bg-[#F5F0EB]"
               >
-                <img src={img} alt="{product.name} view {i + 1}" class="w-full h-full object-cover" />
+                <img src={getImageUrl(img)} alt="{product.name} view {i + 1}" class="w-full h-full object-cover" />
               </button>
             {/each}
           </div>
@@ -93,6 +91,7 @@
         <div class="space-y-4">
           <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-[#8B7D6B]">{product.category} • {product.material}</p>
           <h1 class="text-4xl sm:text-6xl font-bold text-[#3D3229] leading-tight tracking-tight">{product.name}</h1>
+          <p class="text-[10px] uppercase font-bold tracking-[0.4em] text-[#8B7D6B] mt-1 mb-4 opacity-70">Ref: FR-00{product.id}</p>
           <p class="text-2xl font-bold text-[#3D3229]">${product.price.toLocaleString()}</p>
         </div>
 

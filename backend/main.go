@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"time"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -28,24 +29,49 @@ type Product struct {
 	Finish      string         `json:"finish" db:"finish"`
 	Stone       string         `json:"stone" db:"stone"`
 	Images      pq.StringArray `json:"images" db:"images"`
-	CreatedAt   string         `json:"created_at" db:"created_at"`
+	IsNew       bool           `json:"is_new" db:"is_new"`
+	CreatedAt   time.Time      `json:"created_at" db:"created_at"`
+	SalesCount  int            `json:"sales_count" db:"sales_count"`
 }
 
 type HeroImage struct {
-	ID        int    `json:"id" db:"id"`
-	ImageUrl  string `json:"image_url" db:"image_url"`
-	CreatedAt string `json:"created_at" db:"created_at"`
+	ID        int       `json:"id" db:"id"`
+	ImageUrl  string    `json:"image_url" db:"image_url"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 type OrderRequest struct {
-	CustomerName  string      `json:"customer_name"`
-	CustomerEmail string      `json:"customer_email"`
-	Items         []OrderItem `json:"items"`
+	CustomerName    string      `json:"customer_name"`
+	CustomerPhone   string      `json:"customer_phone"`
+	CustomerAddress string      `json:"customer_address"`
+	RawMessage      string      `json:"raw_message"`
+	Items           []OrderItem `json:"items"`
 }
 
 type OrderItem struct {
 	ProductID int `json:"product_id"`
 	Quantity  int `json:"quantity"`
+}
+
+type Order struct {
+	ID           int            `json:"id" db:"id"`
+	CustomerName string         `json:"customer_name" db:"customer_name"`
+	CustomerPhone string        `json:"customer_phone" db:"customer_phone"`
+	CustomerAddress string      `json:"customer_address" db:"customer_address"`
+	TotalAmount  int            `json:"total_amount" db:"total_amount"`
+	Status       string         `json:"status" db:"status"`
+	RawMessage   string         `json:"raw_message" db:"raw_message"`
+	CreatedAt    time.Time      `json:"created_at" db:"created_at"`
+	Items        []OrderItemDetail `json:"items"`
+}
+
+type OrderItemDetail struct {
+	ID              int    `json:"id" db:"id"`
+	OrderID         int    `json:"order_id" db:"order_id"`
+	ProductID       int    `json:"product_id" db:"product_id"`
+	Quantity        int    `json:"quantity" db:"quantity"`
+	PriceAtPurchase int    `json:"price_at_purchase" db:"price_at_purchase"`
+	ProductName     string `json:"product_name" db:"product_name"`
 }
 
 type App struct {
@@ -104,12 +130,18 @@ func main() {
 	// Routes
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/products", app.getProducts)
+		r.Get("/products/trending", app.getTrendingProducts)
+		r.Get("/products/new", app.getNewProducts)
 		r.Get("/products/{id}", app.getProduct)
 		r.Post("/products", app.createProduct)
 		r.Put("/products/{id}", app.updateProduct)
 		r.Delete("/products/{id}", app.deleteProduct)
 		r.Post("/upload", app.uploadImage)
 		r.Post("/orders", app.createOrder)
+		r.Get("/orders", app.getOrders)
+		r.Get("/orders/track", app.trackOrders)
+		r.Put("/orders/{id}/status", app.updateOrderStatus)
+		r.Post("/track-whatsapp", app.trackWhatsAppClick)
 
 		r.Get("/hero-images", app.getHeroImages)
 		r.Post("/hero-images", app.addHeroImage)
@@ -143,10 +175,10 @@ func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := app.DB.QueryRow(`
-		INSERT INTO products (name, price, category, material, description, weight, dimensions, finish, stone, images)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO products (name, price, category, material, description, weight, dimensions, finish, stone, images, is_new)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id
-	`, p.Name, p.Price, p.Category, p.Material, p.Description, p.Weight, p.Dimensions, p.Finish, p.Stone, pq.Array(p.Images)).Scan(&p.ID)
+	`, p.Name, p.Price, p.Category, p.Material, p.Description, p.Weight, p.Dimensions, p.Finish, p.Stone, pq.Array(p.Images), p.IsNew).Scan(&p.ID)
 
 	if err != nil {
 		log.Printf("Error creating product: %v", err)
@@ -167,9 +199,9 @@ func (app *App) updateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err := app.DB.Exec(`
-		UPDATE products SET name=$1, price=$2, category=$3, material=$4, description=$5, weight=$6, dimensions=$7, finish=$8, stone=$9, images=$10
-		WHERE id=$11
-	`, p.Name, p.Price, p.Category, p.Material, p.Description, p.Weight, p.Dimensions, p.Finish, p.Stone, pq.Array(p.Images), id)
+		UPDATE products SET name=$1, price=$2, category=$3, material=$4, description=$5, weight=$6, dimensions=$7, finish=$8, stone=$9, images=$10, is_new=$11
+		WHERE id=$12
+	`, p.Name, p.Price, p.Category, p.Material, p.Description, p.Weight, p.Dimensions, p.Finish, p.Stone, pq.Array(p.Images), p.IsNew, id)
 
 	if err != nil {
 		log.Printf("Error updating product: %v", err)
@@ -222,14 +254,19 @@ func (app *App) uploadImage(w http.ResponseWriter, r *http.Request) {
 	file.Read(fileContent)
 	f.Write(fileContent)
 
-	imageUrl := fmt.Sprintf("http://localhost:8080/uploads/%s", filename)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"url": imageUrl})
+	json.NewEncoder(w).Encode(map[string]string{"filename": filename})
 }
 
 func (app *App) getProducts(w http.ResponseWriter, r *http.Request) {
-	var products []Product
-	err := app.DB.Select(&products, "SELECT * FROM products")
+	products := []Product{}
+	query := `
+		SELECT p.*, COALESCE(s.total_clicks, 0) as sales_count 
+		FROM products p 
+		LEFT JOIN product_sales_stats s ON p.id = s.product_id
+		ORDER BY p.created_at DESC
+	`
+	err := app.DB.Select(&products, query)
 	if err != nil {
 		log.Printf("Error fetching products: %v", err)
 		http.Error(w, "Failed to retrieve products", http.StatusInternalServerError)
@@ -240,10 +277,77 @@ func (app *App) getProducts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(products)
 }
 
+func (app *App) getTrendingProducts(w http.ResponseWriter, r *http.Request) {
+	products := []Product{}
+	query := `
+		SELECT p.*, COALESCE(s.total_clicks, 0) as sales_count 
+		FROM products p 
+		INNER JOIN product_sales_stats s ON p.id = s.product_id
+		WHERE s.total_clicks > 0
+		ORDER BY s.total_clicks DESC
+		LIMIT 8
+	`
+	err := app.DB.Select(&products, query)
+	if err != nil {
+		log.Printf("Error fetching trending products: %v", err)
+		http.Error(w, "Failed to retrieve trending products", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(products)
+}
+
+func (app *App) getNewProducts(w http.ResponseWriter, r *http.Request) {
+	products := []Product{}
+	query := `
+		SELECT p.*, COALESCE(s.total_clicks, 0) as sales_count 
+		FROM products p 
+		LEFT JOIN product_sales_stats s ON p.id = s.product_id
+		WHERE p.is_new = TRUE
+		ORDER BY p.created_at DESC
+		LIMIT 8
+	`
+	err := app.DB.Select(&products, query)
+	if err != nil {
+		log.Printf("Error fetching new products: %v", err)
+		http.Error(w, "Failed to retrieve new products", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(products)
+}
+
+func (app *App) trackWhatsAppClick(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		ProductID int `json:"product_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	_, err := app.DB.Exec("INSERT INTO whatsapp_clicks (product_id) VALUES ($1)", req.ProductID)
+	if err != nil {
+		log.Printf("Error tracking WhatsApp click: %v", err)
+		http.Error(w, "Failed to track click", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (app *App) getProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	var product Product
-	err := app.DB.Get(&product, "SELECT * FROM products WHERE id = $1", id)
+	query := `
+		SELECT p.*, COALESCE(s.total_clicks, 0) as sales_count 
+		FROM products p 
+		LEFT JOIN product_sales_stats s ON p.id = s.product_id
+		WHERE p.id = $1
+	`
+	err := app.DB.Get(&product, query, id)
 	if err != nil {
 		http.Error(w, "Product not found", http.StatusNotFound)
 		return
@@ -280,8 +384,8 @@ func (app *App) createOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var orderID int
-	err = tx.QueryRow("INSERT INTO orders (customer_name, customer_email, total_amount) VALUES ($1, $2, $3) RETURNING id",
-		req.CustomerName, req.CustomerEmail, total).Scan(&orderID)
+	err = tx.QueryRow("INSERT INTO orders (customer_name, customer_phone, customer_address, total_amount, raw_message) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		req.CustomerName, req.CustomerPhone, req.CustomerAddress, total, req.RawMessage).Scan(&orderID)
 	if err != nil {
 		log.Printf("Error inserting order: %v", err)
 		http.Error(w, "Failed to process order", http.StatusInternalServerError)
@@ -313,8 +417,109 @@ func (app *App) createOrder(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (app *App) getOrders(w http.ResponseWriter, r *http.Request) {
+	var orders []Order
+	query := `
+		SELECT id, customer_name, 
+		COALESCE(customer_phone, '') as customer_phone, 
+		COALESCE(customer_address, '') as customer_address, 
+		total_amount, status, 
+		COALESCE(raw_message, '') as raw_message, 
+		created_at 
+		FROM orders 
+		ORDER BY created_at DESC
+	`
+	err := app.DB.Select(&orders, query)
+	if err != nil {
+		log.Printf("Error fetching orders: %v", err)
+		http.Error(w, "Failed to fetch orders", http.StatusInternalServerError)
+		return
+	}
+
+	for i, order := range orders {
+		var items []OrderItemDetail
+		query := `
+			SELECT oi.*, p.name as product_name 
+			FROM order_items oi 
+			JOIN products p ON oi.product_id = p.id 
+			WHERE oi.order_id = $1
+		`
+		app.DB.Select(&items, query, order.ID)
+		orders[i].Items = items
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(orders)
+}
+
+func (app *App) trackOrders(w http.ResponseWriter, r *http.Request) {
+	phone := r.URL.Query().Get("phone")
+	if phone == "" {
+		http.Error(w, "Phone number required", http.StatusBadRequest)
+		return
+	}
+
+	// Clean the input phone number (remove spaces, plus, etc for better matching)
+	// but for now we'll just use a fuzzy LIKE search
+	searchPattern := "%" + phone + "%"
+
+	var orders []Order
+	query := `
+		SELECT id, customer_name, 
+		COALESCE(customer_phone, '') as customer_phone, 
+		COALESCE(customer_address, '') as customer_address, 
+		total_amount, status, 
+		COALESCE(raw_message, '') as raw_message, 
+		created_at 
+		FROM orders 
+		WHERE customer_phone LIKE $1 
+		ORDER BY created_at DESC
+	`
+	err := app.DB.Select(&orders, query, searchPattern)
+	if err != nil {
+		log.Printf("Error tracking orders: %v", err)
+		http.Error(w, "Failed to fetch orders", http.StatusInternalServerError)
+		return
+	}
+
+	for i, order := range orders {
+		var items []OrderItemDetail
+		query := `
+			SELECT oi.*, p.name as product_name 
+			FROM order_items oi 
+			JOIN products p ON oi.product_id = p.id 
+			WHERE oi.order_id = $1
+		`
+		app.DB.Select(&items, query, order.ID)
+		orders[i].Items = items
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(orders)
+}
+
+func (app *App) updateOrderStatus(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	var body struct {
+		Status string `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	_, err := app.DB.Exec("UPDATE orders SET status = $1 WHERE id = $2", body.Status, idStr)
+	if err != nil {
+		log.Printf("Error updating order status: %v", err)
+		http.Error(w, "Failed to update status", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (app *App) getHeroImages(w http.ResponseWriter, r *http.Request) {
-	var images []HeroImage
+	images := []HeroImage{}
 	err := app.DB.Select(&images, "SELECT * FROM hero_images ORDER BY id ASC")
 	if err != nil {
 		log.Printf("Error fetching hero images: %v", err)

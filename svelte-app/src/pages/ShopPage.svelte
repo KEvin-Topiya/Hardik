@@ -14,23 +14,53 @@
   let category = 'All';
   let sortBy = 'newest';
   let viewMode = 'grid';
+  let abortController = null;
 
-  onMount(async () => {
-    try {
-      const data = await getProducts();
-      products = data;
-    } catch (err) {
-      error = 'Failed to load products. Please check if the server is running.';
-      console.error(err);
-    } finally {
+  function stopLoading() {
+    if (abortController) {
+      abortController.abort();
+      abortController = null;
       loading = false;
     }
+  }
+
+  onMount(() => {
+    fetchData();
+    return () => {
+      if (abortController) abortController.abort();
+    };
   });
 
+  async function fetchData() {
+    loading = true;
+    error = null;
+    abortController = new AbortController();
+    try {
+      const data = await getProducts(abortController.signal);
+      products = data || [];
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        console.log('Fetch aborted');
+      } else {
+        error = 'Failed to load products. Please check if the server is running.';
+        console.error(err);
+      }
+    } finally {
+      loading = false;
+      abortController = null;
+    }
+  }
+
   $: filteredProducts = (() => {
-    let result = [...products];
+    let result = Array.isArray(products) ? [...products] : [];
     if (category !== 'All') {
-      result = result.filter((p) => p.category === category);
+      result = result.filter((p) => {
+        const pCat = p.category.toLowerCase();
+        const tCat = category.toLowerCase();
+        return pCat === tCat || 
+               pCat === tCat.replace(/s$/, '') || 
+               tCat === pCat.replace(/s$/, '');
+      });
     }
     if (sortBy === 'price-low') {
       result.sort((a, b) => a.price - b.price);
@@ -48,7 +78,7 @@
 <SEO 
   title="Shop Collection | Aarti Abhushan" 
   description="Browse our complete collection of rings, necklaces, earrings, and bracelets. Find the perfect piece for your next milestone."
-  keywords="jewelry shop, buy gold jewelry, diamond rings collection, silver ornaments, Aarti Abhushan shop"
+  keywords="Aarti, Aarti Abhushan, Aarti Abhusan, Abhushan, Abhusan, jewelry shop, buy gold jewelry, diamond rings collection, silver ornaments, Aarti Abhushan shop, jewelry store, luxury collection"
 />
 
 <div class="min-h-screen bg-[#FFFCF9] pb-24">
@@ -103,11 +133,30 @@
 
   <div class="max-w-7xl mx-auto px-4 py-12">
     {#if loading}
-      <div class="flex flex-col items-center justify-center py-24 space-y-4">
-        <div class="animate-spin text-[#3D3229]">
-          <Loader2 size={32} />
+      <div class="flex flex-col items-center justify-center py-24 space-y-6">
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8 w-full opacity-50 pointer-events-none">
+          {#each Array(8) as _}
+            <div class="space-y-4 animate-pulse">
+              <div class="aspect-[4/5] bg-[#F5F0EB] rounded-sm" />
+              <div class="space-y-2">
+                <div class="h-4 bg-[#F5F0EB] rounded w-3/4" />
+                <div class="h-3 bg-[#F5F0EB] rounded w-1/2" />
+              </div>
+            </div>
+          {/each}
         </div>
-        <p class="text-[#8B7D6B] font-medium tracking-wide">Syncing Collection...</p>
+        <div class="flex flex-col items-center space-y-4">
+          <div class="animate-spin text-[#3D3229]">
+            <Loader2 size={32} />
+          </div>
+          <p class="text-[#8B7D6B] font-medium tracking-wide">Syncing Collection...</p>
+          <button 
+            on:click={stopLoading}
+            class="text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors border-b border-red-500 pb-0.5"
+          >
+            Cancel Sync
+          </button>
+        </div>
       </div>
     {:else if error}
       <div class="text-center py-24 bg-[#FFF5F5] border border-red-100 rounded-lg">

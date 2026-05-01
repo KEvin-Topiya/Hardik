@@ -8,7 +8,7 @@
 <SEO 
   title="About Our Heritage | Aarti Abhushan" 
   description="Discover the story of Aarti Abhushan. Our heritage of fine craftsmanship and commitment to quality in every jewelry piece."
-  keywords="about Aarti Abhushan, jewelry brand history, craftsmanship, jewelry designers, authentic jewelry India"
+  keywords="about Aarti Abhushan, Aarti, Abhushan, Aarti Abhusan, Abhusan, Arati, jewelry brand history, craftsmanship, jewelry designers, authentic jewelry India, luxury jewelry heritage, traditional jewelry store"
 />
 
 <div class="min-h-screen bg-[#FFFCF9] pb-24" in:fade>

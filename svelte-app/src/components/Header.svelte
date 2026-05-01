@@ -13,7 +13,7 @@
     { id: 'home', label: 'Home' },
     { id: 'shop', label: 'Shop' },
     { id: 'about', label: 'The House' },
-    { id: 'admin', label: 'Admin' }
+    { id: 'track', label: 'Track Order' }
   ];
 
   function toggleMenu() {

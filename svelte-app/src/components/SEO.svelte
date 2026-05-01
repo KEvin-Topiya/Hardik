@@ -1,7 +1,7 @@
 <script>
   export let title = "Aarti Abhushan | Premium Jewelry Collection";
   export let description = "Discover the finest collection of gold, silver, and diamond jewelry at Aarti Abhushan. Exquisite designs for every occasion.";
-  export let keywords = "Aarti Abhushan, jewelry, gold jewelry, silver jewelry, diamond jewelry, wedding jewelry, indian jewelry, luxury ornaments";
+  export let keywords = "Aarti, Aarti Abhushan, Aarti Abhusan, Abhushan, Abhusan, Arati Abhushan, premium jewelry, gold jewelry, silver jewelry, diamond jewelry, wedding jewelry, indian jewelry, luxury ornaments, handmade jewelry, bridal collection, custom jewelry, gold rings, diamond necklaces, jewelry shop in india, authentic ornaments";
 </script>
 
 <svelte:head>

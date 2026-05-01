@@ -8,20 +8,21 @@
   import CartPage from './pages/CartPage.svelte';
   import AboutPage from './pages/AboutPage.svelte';
   import AdminPage from './pages/AdminPage.svelte';
+  import TrackPage from './pages/TrackPage.svelte';
 
   let currentPage = 'home';
   let selectedProduct = null;
 
   onMount(() => {
-    const validPages = ['home', 'shop', 'product', 'cart', 'about', 'admin'];
+    const validPages = ['home', 'shop', 'product', 'cart', 'about', 'admin', 'track'];
     
     // Check URL first
-    let path = window.location.hash.slice(1);
+    let path = window.location.pathname.slice(1);
     if (!path || !validPages.includes(path)) {
-      // Fallback to local storage or home if invalid hash
+      // Fallback to local storage or home if invalid path
       const savedPage = localStorage.getItem('currentPage');
       path = validPages.includes(savedPage) ? savedPage : 'home';
-      window.location.hash = path;
+      window.history.replaceState({page: path}, '', `/${path}`);
     }
     currentPage = path;
     
@@ -34,25 +35,31 @@
       }
     }
 
-    const handleHashChange = () => {
-      let newPath = window.location.hash.slice(1);
+    const handlePopState = (event) => {
+      let newPath = window.location.pathname.slice(1);
       if (!newPath || !validPages.includes(newPath)) {
         newPath = 'home';
-        window.location.hash = newPath;
       }
       currentPage = newPath;
       localStorage.setItem('currentPage', newPath);
+      
+      const savedProduct = localStorage.getItem('selectedProduct');
+      if (newPath === 'product' && savedProduct) {
+        selectedProduct = JSON.parse(savedProduct);
+      }
+      
       window.scrollTo(0, 0);
     };
     
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   });
 
   function navigate(page) {
     currentPage = page;
     localStorage.setItem('currentPage', page);
-    window.location.hash = page;
+    window.history.pushState({page}, '', `/${page}`);
+    window.scrollTo(0, 0);
     if (page !== 'product') {
       selectedProduct = null;
       localStorage.removeItem('selectedProduct');
@@ -64,7 +71,8 @@
     localStorage.setItem('selectedProduct', JSON.stringify(product));
     currentPage = 'product';
     localStorage.setItem('currentPage', 'product');
-    window.location.hash = 'product';
+    window.history.pushState({page: 'product'}, '', '/product');
+    window.scrollTo(0, 0);
   }
 </script>
 
@@ -95,6 +103,8 @@
       <CartPage on:navigate={(e) => navigate(e.detail)} />
     {:else if currentPage === 'about'}
       <AboutPage />
+    {:else if currentPage === 'track'}
+      <TrackPage on:navigate={(e) => navigate(e.detail)} />
     {:else if currentPage === 'admin'}
       <AdminPage />
     {:else}

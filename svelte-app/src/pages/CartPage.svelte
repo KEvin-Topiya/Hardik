@@ -3,6 +3,8 @@
   import { ShoppingBag, ArrowLeft, Trash2, Plus, Minus, MessageCircle } from 'lucide-svelte';
   import { cart, removeFromCart, updateQuantity, clearCart } from '../lib/cart';
   import { sendWhatsAppOrder } from '../lib/whatsapp';
+  import { onMount } from 'svelte';
+  import { trackWhatsAppClick, getImageUrl } from '../services/api';
   import { fade, fly } from 'svelte/transition';
   import SEO from '../components/SEO.svelte';
 
@@ -15,9 +17,42 @@
     dispatch('navigate', id);
   }
 
+  let showClearConfirm = false;
+  let customerName = '';
+  let customerPhone = '';
+  let customerAddress = '';
+
+  onMount(() => {
+    customerName = localStorage.getItem('customerName') || '';
+    customerPhone = localStorage.getItem('customerPhone') || '';
+    customerAddress = localStorage.getItem('customerAddress') || '';
+  });
+
   function handlePlaceOrder() {
     if (cartItems.length === 0) return;
-    sendWhatsAppOrder(cartItems, cartTotal);
+    showClearConfirm = true;
+  }
+
+  function confirmOrder(shouldClear) {
+    // Save details for next time
+    localStorage.setItem('customerName', customerName);
+    localStorage.setItem('customerPhone', customerPhone);
+    localStorage.setItem('customerAddress', customerAddress);
+
+    // Track each product click for trending analysis
+    cartItems.forEach(item => {
+      trackWhatsAppClick(item.id);
+    });
+    
+    sendWhatsAppOrder(cartItems, cartTotal, customerName, customerPhone, customerAddress);
+    
+    if (shouldClear) {
+      clearCart();
+    }
+    
+    alert("Order request sent! You can check your order status in 'Track Orders' after our team confirms it via WhatsApp.");
+    showClearConfirm = false;
+    handleNav('track');
   }
 </script>
 
@@ -77,9 +112,13 @@
               class="flex flex-col sm:flex-row gap-6 pb-8 border-b border-[#EDE7E0] group"
               in:fly={{ y: 20, duration: 400 }}
             >
-              <div class="w-24 h-24 sm:w-32 sm:h-32 bg-[#F5F0EB] border border-[#DDD5CC] rounded-sm flex items-center justify-center shrink-0">
-                <!-- Geometric Minimal Icon -->
-                <div class="w-8 h-8 sm:w-12 sm:h-12 border border-[#C9BDB0] rounded-full group-hover:rotate-45 transition-transform duration-700" />
+              <div class="w-24 h-24 sm:w-32 sm:h-32 bg-[#F5F0EB] border border-[#DDD5CC] rounded-sm overflow-hidden flex items-center justify-center shrink-0">
+                {#if item.images && item.images.length > 0}
+                  <img src={getImageUrl(item.images[0])} alt={item.name} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                {:else}
+                  <!-- Geometric Minimal Icon -->
+                  <div class="w-8 h-8 sm:w-12 sm:h-12 border border-[#C9BDB0] rounded-full group-hover:rotate-45 transition-transform duration-700" />
+                {/if}
               </div>
               
               <div class="flex-grow flex flex-col justify-between">
@@ -88,7 +127,10 @@
                     <h3 class="text-lg font-bold text-[#3D3229] mb-1">{item.name}</h3>
                     <p class="text-xs text-[#8B7D6B] uppercase tracking-widest font-bold">{item.category} • {item.material}</p>
                   </div>
-                  <p class="text-lg font-bold text-[#3D3229]">${item.price.toLocaleString()}</p>
+                  <div class="text-right">
+                    <p class="text-lg font-bold text-[#3D3229]">₹{item.price.toLocaleString()}</p>
+                    <p class="text-[10px] text-[#8B7D6B] font-bold uppercase tracking-widest mt-1">Total: ₹{(item.price * item.quantity).toLocaleString()}</p>
+                  </div>
                 </div>
                 
                 <div class="flex items-center justify-between mt-4">
@@ -160,3 +202,74 @@
     {/if}
   </div>
 </div>
+
+<!-- Confirmation Modal -->
+{#if showClearConfirm}
+  <div class="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-[#3D3229]/60 backdrop-blur-sm" in:fade>
+    <div class="bg-white w-full max-w-md p-8 rounded-sm shadow-2xl space-y-6" in:fly={{ y: 20 }}>
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 bg-[#F5F0EB] rounded-full flex items-center justify-center text-[#3D3229] mx-auto mb-4">
+           <MessageCircle size={32} />
+        </div>
+        <h2 class="text-2xl font-bold text-[#3D3229]">Proceed to WhatsApp</h2>
+        <p class="text-[#8B7D6B] text-sm font-medium">Please confirm your details before ordering.</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label for="custName" class="block text-[10px] font-bold uppercase tracking-widest text-[#8B7D6B] mb-1">Your Name</label>
+          <input 
+            id="custName"
+            type="text" 
+            bind:value={customerName}
+            class="w-full px-4 py-3 bg-[#F5F0EB] border border-[#DDD5CC] outline-none focus:border-[#3D3229] transition-all text-sm"
+            placeholder="Ex: John Doe"
+          />
+        </div>
+        <div>
+          <label for="custPhone" class="block text-[10px] font-bold uppercase tracking-widest text-[#8B7D6B] mb-1">WhatsApp Number (Optional)</label>
+          <input 
+            id="custPhone"
+            type="tel" 
+            bind:value={customerPhone}
+            class="w-full px-4 py-3 bg-[#F5F0EB] border border-[#DDD5CC] outline-none focus:border-[#3D3229] transition-all text-sm"
+            placeholder="Ex: +91 98765 43210"
+          />
+        </div>
+        <div>
+          <label for="custAddress" class="block text-[10px] font-bold uppercase tracking-widest text-[#8B7D6B] mb-1">Shipping Address</label>
+          <textarea 
+            id="custAddress"
+            bind:value={customerAddress}
+            class="w-full px-4 py-3 bg-[#F5F0EB] border border-[#DDD5CC] outline-none focus:border-[#3D3229] transition-all text-sm h-24"
+            placeholder="Enter your full delivery address..."
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-[#F5F0EB]">
+        <p class="text-[10px] text-[#8B7D6B] font-bold uppercase tracking-widest mb-4">Post-Order Action:</p>
+        <div class="grid grid-cols-1 gap-3">
+          <button 
+            on:click={() => confirmOrder(true)}
+            class="w-full py-4 bg-[#3D3229] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#5C4F43] transition-all"
+          >
+            Clear Cart & Send Message
+          </button>
+          <button 
+            on:click={() => confirmOrder(false)}
+            class="w-full py-4 bg-white border border-[#DDD5CC] text-[#3D3229] text-xs font-bold uppercase tracking-widest hover:bg-[#F5F0EB] transition-all"
+          >
+            Keep Items & Send Message
+          </button>
+          <button 
+            on:click={() => (showClearConfirm = false)}
+            class="w-full py-2 text-[#B8A99A] text-[10px] font-bold uppercase tracking-widest hover:text-[#3D3229] transition-colors"
+          >
+            Back to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}

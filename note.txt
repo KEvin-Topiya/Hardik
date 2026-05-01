@@ -1,0 +1,155 @@
+===========================
+EC2 Server Reference Notes
+===========================
+
+# -------------------------
+# PostgreSQL
+# -------------------------
+
+# Start PostgreSQL
+sudo systemctl start postgresql
+
+# Stop PostgreSQL
+sudo systemctl stop postgresql
+
+# Restart PostgreSQL
+sudo systemctl restart postgresql
+
+# Status
+sudo systemctl status postgresql
+
+# Login as superuser
+sudo -u postgres psql
+
+# Login as PostgreSQL user 'axaz' to database 'mydb'
+psql -U axaz -d mydb -h localhost
+
+# Grant schema privileges if permission denied
+-- Connect as postgres superuser
+\c mydb
+GRANT ALL PRIVILEGES ON SCHEMA public TO axaz;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO axaz;
+
+# Common psql commands
+\dt            -- list tables
+\d table_name  -- describe table
+\q             -- quit
+
+# -------------------------
+# Go Backend
+# -------------------------
+
+# Navigate to project folder
+cd /home/admin/Hardik
+
+# Build Go binary
+go build -ldflags="-s -w" -o app
+
+# Run manually
+./app
+
+# Systemd service: /etc/systemd/system/hardik.service
+[Unit]
+Description=Hardik Go App
+After=network.target
+
+[Service]
+User=admin
+WorkingDirectory=/home/admin/Hardik
+ExecStart=/home/admin/Hardik/app
+Restart=always
+RestartSec=5
+Environment=PORT=8080
+
+[Install]
+WantedBy=multi-user.target
+
+# Start / Stop / Restart Go backend
+sudo systemctl start hardik.service
+sudo systemctl stop hardik.service
+sudo systemctl restart hardik.service
+sudo systemctl status hardik.service
+
+# Logs
+journalctl -u hardik.service -f
+
+# -------------------------
+# Nginx
+# -------------------------
+
+# Install Nginx
+sudo apt install nginx -y
+
+# Start / Stop / Restart / Status
+sudo systemctl start nginx
+sudo systemctl stop nginx
+sudo systemctl restart nginx
+sudo systemctl status nginx
+
+# Nginx config: /etc/nginx/sites-available/hardik
+server {
+    listen 80;
+    server_name your-server-ip-or-domain;
+
+    root /home/admin/Hardik/upload;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/hardik /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+
+# -------------------------
+# Memory Optimization
+# -------------------------
+
+# Check RAM usage
+free -h
+
+# Check swap usage
+swapon --show
+
+# Increase swap to 2GB
+sudo swapoff /swapfile
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Check processes using RAM
+top
+htop  # if installed
+
+# Optional: zram for compressed RAM
+sudo apt install zram-tools -y
+sudo nano /etc/default/zramswap
+# Set:
+# ALGO=lz4
+# PERCENT=50
+# PRIORITY=100
+sudo systemctl restart zramswap
+
+# Swappiness optimization
+sudo sysctl vm.swappiness=10
+echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+
+# -------------------------
+# Quick Reference Table
+# -------------------------
+# Component      Start               Stop                Restart             Status
+# PostgreSQL     systemctl start     systemctl stop     systemctl restart   systemctl status
+# Go backend     systemctl start     systemctl stop     systemctl restart   systemctl status
+# Nginx          systemctl start     systemctl stop     systemctl restart   systemctl status
+
