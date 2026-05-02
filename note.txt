@@ -22,7 +22,7 @@ sudo systemctl status postgresql
 sudo -u postgres psql
 
 # Login as PostgreSQL user 'axaz' to database 'mydb'
-psql -U axaz -d mydb -h localhost
+psql -U axaz -d aarti -h localhost
 
 # Grant schema privileges if permission denied
 -- Connect as postgres superuser
@@ -86,8 +86,8 @@ sudo systemctl stop nginx
 sudo systemctl restart nginx
 sudo systemctl status nginx
 
-# Nginx config: /etc/nginx/sites-available/hardik
-server {
+    # Nginx config: /etc/nginx/sites-available/hardik
+    server {
     listen 80;
     server_name your-server-ip-or-domain;
 

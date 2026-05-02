@@ -81,11 +81,11 @@
   keywords="Aarti, Aarti Abhushan, Aarti Abhusan, Abhushan, Abhusan, jewelry shop, buy gold jewelry, diamond rings collection, silver ornaments, Aarti Abhushan shop, jewelry store, luxury collection"
 />
 
-<div class="min-h-screen bg-[#FFFCF9] pb-24">
-  <div class="bg-[#F5F0EB] border-b border-[#DDD5CC] py-12 px-4 shadow-sm">
+<div class="min-h-screen bg-[#FFFCF9] pb-12 sm:pb-24">
+  <div class="bg-[#F5F0EB] border-b border-[#DDD5CC] py-6 sm:py-12 px-4 shadow-sm">
     <div class="max-w-7xl mx-auto">
-      <h1 class="text-4xl font-bold text-[#3D3229] mb-4">The Collection</h1>
-      <p class="text-[#8B7D6B] max-w-2xl text-lg font-medium">
+      <h1 class="text-3xl sm:text-4xl font-bold text-[#3D3229] mb-2 sm:mb-4">The Collection</h1>
+      <p class="text-[#8B7D6B] max-w-2xl text-base sm:text-lg font-medium">
         Explore our complete range of architectural jewelry. Each piece is designed with precision and crafted for longevity.
       </p>
     </div>
@@ -131,7 +131,7 @@
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4 py-12">
+  <div class="max-w-7xl mx-auto px-4 py-6 sm:py-12">
     {#if loading}
       <div class="flex flex-col items-center justify-center py-24 space-y-6">
         <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8 w-full opacity-50 pointer-events-none">

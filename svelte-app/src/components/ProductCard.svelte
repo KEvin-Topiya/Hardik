@@ -49,7 +49,7 @@
       {product.material}
     </p>
     <p class="text-xs sm:text-sm font-semibold text-[#3D3229] mt-1 sm:mt-2">
-      ${product.price.toLocaleString()}
+      ₹{product.price.toLocaleString()}
     </p>
   </div>
 </div>

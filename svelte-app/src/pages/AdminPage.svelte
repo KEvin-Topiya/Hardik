@@ -327,7 +327,7 @@
 
 <SEO title="Admin Panel | Aarti Abhushan" description="Manage your jewelry products and inventory." />
 
-<div class="min-h-screen bg-[#FDFCFB] pt-12 pb-24 px-4">
+<div class="min-h-screen bg-[#FDFCFB] pt-6 sm:pt-12 pb-12 sm:pb-24 px-4">
   <div class="max-w-7xl mx-auto">
     {#if !isAuthenticated}
       <div class="max-w-md mx-auto mt-24 bg-white p-8 border border-[#F0EBE5] shadow-xl rounded-sm">
@@ -375,11 +375,11 @@
         Back to Website
       </a>
     </div>
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
       <div>
-        <h1 class="text-4xl font-bold text-[#3D3229]">Dashboard</h1>
-        <div class="flex items-center gap-4 mt-2">
-          <p class="text-[#8B7D6B]">Manage your products and website content.</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-[#3D3229]">Dashboard</h1>
+        <div class="flex flex-wrap items-center gap-4 mt-2">
+          <p class="text-[#8B7D6B] text-sm">Manage your products and website content.</p>
           <button 
             on:click={handleLogout}
             class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-red-400 hover:text-red-600 transition-colors"
@@ -391,21 +391,21 @@
       {#if activeTab === 'products'}
         <button 
           on:click={openAddModal}
-          class="flex items-center gap-2 bg-[#3D3229] text-white px-6 py-3 rounded-sm font-bold uppercase tracking-widest text-xs hover:bg-[#5C4F43] transition-all"
+          class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#3D3229] text-white px-6 py-3 rounded-sm font-bold uppercase tracking-widest text-xs hover:bg-[#5C4F43] transition-all"
         >
           <Plus size={18} /> Add Product
         </button>
       {:else if activeTab === 'orders'}
         <button 
           on:click={() => isOrderModalOpen = true}
-          class="flex items-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-all"
+          class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-sm font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-all"
         >
           <MessageSquare size={18} /> Paste WhatsApp Order
         </button>
       {/if}
     </div>
 
-    <div class="flex space-x-8 border-b border-[#F0EBE5] mb-8">
+    <div class="flex space-x-6 sm:space-x-8 border-b border-[#F0EBE5] mb-8 overflow-x-auto no-scrollbar whitespace-nowrap">
       <button 
         on:click={() => activeTab = 'products'} 
         class="pb-4 font-bold uppercase tracking-widest text-xs {activeTab === 'products' ? 'text-[#3D3229] border-b-2 border-[#3D3229]' : 'text-[#8B7D6B] hover:text-[#3D3229]'}"
@@ -433,55 +433,58 @@
       </div>
     {:else}
       {#if activeTab === 'products'}
-        <div class="bg-white shadow-sm border border-[#F0EBE5] overflow-hidden rounded-sm">
-          <table class="w-full text-left">
+        <div class="bg-white shadow-sm border border-[#F0EBE5] overflow-x-auto rounded-sm">
+          <table class="w-full text-left min-w-[600px] sm:min-w-0">
             <thead class="bg-[#F5F0EB] text-[#3D3229] uppercase text-xs font-bold tracking-widest">
               <tr>
-                <th class="px-6 py-4">Image</th>
-                <th class="px-6 py-4">Ref ID</th>
-                <th class="px-6 py-4">Product Name</th>
-                <th class="px-6 py-4">Category</th>
-                <th class="px-6 py-4">Price</th>
-                <th class="px-6 py-4">Sales (Clicks)</th>
-                <th class="px-6 py-4 text-right">Actions</th>
+                <th class="px-4 sm:px-6 py-4">Image</th>
+                <th class="hidden sm:table-cell px-6 py-4">Ref ID</th>
+                <th class="px-4 sm:px-6 py-4">Product Name</th>
+                <th class="hidden md:table-cell px-6 py-4">Category</th>
+                <th class="px-4 sm:px-6 py-4">Price</th>
+                <th class="hidden lg:table-cell px-6 py-4">Sales</th>
+                <th class="px-4 sm:px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[#F0EBE5]">
               {#each products as product}
                 <tr class="hover:bg-[#FFFCF9] transition-colors">
-                  <td class="px-6 py-4">
-                    <div class="w-12 h-12 bg-[#F5F0EB] rounded-sm overflow-hidden">
+                  <td class="px-4 sm:px-6 py-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-[#F5F0EB] rounded-sm overflow-hidden">
                       {#if product.images && product.images.length > 0}
                         <img src={getImageUrl(product.images[0])} alt={product.name} class="w-full h-full object-cover" />
                       {:else}
                         <div class="w-full h-full flex items-center justify-center text-[#8B7D6B]">
-                          <ImageIcon size={20} />
+                          <ImageIcon size={16} />
                         </div>
                       {/if}
                     </div>
                   </td>
-                  <td class="px-6 py-4 font-mono text-[10px] text-[#8B7D6B]">FR-00{product.id}</td>
-                  <td class="px-6 py-4 font-bold text-[#3D3229]">{product.name}</td>
-                  <td class="px-6 py-4 text-[#6B5D50]">{product.category}</td>
-                  <td class="px-6 py-4 text-[#3D3229]">₹{product.price.toLocaleString()}</td>
-                  <td class="px-6 py-4">
+                  <td class="hidden sm:table-cell px-6 py-4 font-mono text-[10px] text-[#8B7D6B]">FR-00{product.id}</td>
+                  <td class="px-4 sm:px-6 py-4 font-bold text-[#3D3229] text-sm sm:text-base">
+                    {product.name}
+                    <div class="md:hidden font-normal text-[10px] text-[#8B7D6B] mt-0.5">{product.category} • FR-00{product.id}</div>
+                  </td>
+                  <td class="hidden md:table-cell px-6 py-4 text-[#6B5D50]">{product.category}</td>
+                  <td class="px-4 sm:px-6 py-4 text-[#3D3229] font-medium text-sm">₹{product.price.toLocaleString()}</td>
+                  <td class="hidden lg:table-cell px-6 py-4">
                     <span class="px-3 py-1 bg-[#F5F0EB] text-[#3D3229] rounded-full text-[10px] font-bold uppercase tracking-widest border border-[#DDD5CC]">
                       {product.sales_count || 0}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex justify-end gap-3">
+                  <td class="px-4 sm:px-6 py-4 text-right">
+                    <div class="flex justify-end gap-2 sm:gap-3">
                       <button 
                         on:click={() => openEditModal(product)}
                         class="p-2 text-[#8B7D6B] hover:text-[#3D3229] transition-colors"
                       >
-                        <Edit size={18} />
+                        <Edit size={16} />
                       </button>
                       <button 
                         on:click={() => handleDelete(product.id)}
                         class="p-2 text-red-400 hover:text-red-600 transition-colors"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
@@ -553,31 +556,32 @@
             <button on:click={fetchOrders} class="p-2 text-[#8B7D6B] hover:text-[#3D3229]"><RefreshCw size={20} /></button>
           </div>
           
-          <div class="bg-white border border-[#F0EBE5] rounded-sm overflow-hidden">
-            <table class="w-full text-left">
+          <div class="bg-white border border-[#F0EBE5] rounded-sm overflow-x-auto">
+            <table class="w-full text-left min-w-[600px] sm:min-w-0">
               <thead class="bg-[#F5F0EB] text-[#3D3229] uppercase text-xs font-bold tracking-widest">
                 <tr>
-                  <th class="px-6 py-4">ID</th>
-                  <th class="px-6 py-4">Date</th>
-                  <th class="px-6 py-4">Customer</th>
-                  <th class="px-6 py-4">Status</th>
-                  <th class="px-6 py-4 text-right">Actions</th>
+                  <th class="px-4 sm:px-6 py-4">ID</th>
+                  <th class="hidden sm:table-cell px-6 py-4">Date</th>
+                  <th class="px-4 sm:px-6 py-4">Customer</th>
+                  <th class="px-4 sm:px-6 py-4">Status</th>
+                  <th class="px-4 sm:px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-[#F0EBE5]">
                 {#each orders as order}
                   <tr class="hover:bg-[#FFFCF9]">
-                    <td class="px-6 py-4 font-mono text-xs">#{order.id}</td>
-                    <td class="px-6 py-4 text-xs text-[#8B7D6B]">{new Date(order.created_at).toLocaleDateString()}</td>
-                    <td class="px-6 py-4">
-                      <div class="font-bold text-[#3D3229]">{order.customer_name}</div>
+                    <td class="px-4 sm:px-6 py-4 font-mono text-xs">#{order.id}</td>
+                    <td class="hidden sm:table-cell px-6 py-4 text-xs text-[#8B7D6B]">{new Date(order.created_at).toLocaleDateString()}</td>
+                    <td class="px-4 sm:px-6 py-4">
+                      <div class="font-bold text-[#3D3229] text-sm">{order.customer_name}</div>
                       <div class="text-[10px] text-[#8B7D6B]">{order.customer_phone}</div>
+                      <div class="sm:hidden text-[9px] text-[#8B7D6B] mt-1">{new Date(order.created_at).toLocaleDateString()}</div>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-4 sm:px-6 py-4">
                       <select 
                         value={order.status} 
                         on:change={(e) => updateStatus(order.id, e.target.value)}
-                        class="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-[#F5F0EB] border border-[#DDD5CC] outline-none focus:border-[#3D3229]"
+                        class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-[#F5F0EB] border border-[#DDD5CC] outline-none focus:border-[#3D3229]"
                       >
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
@@ -587,10 +591,10 @@
                         <option value="canceled">Canceled</option>
                       </select>
                     </td>
-                    <td class="px-6 py-4 text-right">
+                    <td class="px-4 sm:px-6 py-4 text-right">
                       <button 
                         on:click={() => viewOrderDetails(order)}
-                        class="text-xs font-bold uppercase tracking-widest text-[#3D3229] hover:underline"
+                        class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#3D3229] hover:underline whitespace-nowrap"
                       >View Details</button>
                     </td>
                   </tr>
@@ -621,7 +625,7 @@
         <button on:click={() => isViewOrderModalOpen = false} class="p-2 hover:bg-black/5 rounded-full"><X size={24} /></button>
       </div>
       
-      <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div class="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
         <div class="space-y-6">
           <section>
             <h3 class="text-[10px] font-bold uppercase tracking-widest text-[#B8A99A] mb-3">Customer Information</h3>
@@ -690,7 +694,7 @@
 <!-- WhatsApp Order Modal -->
 {#if isOrderModalOpen}
   <div class="fixed inset-0 z-[110] flex items-center justify-center px-4 bg-[#3D3229]/60 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-2xl rounded-sm shadow-2xl p-8 space-y-6">
+    <div class="bg-white w-full max-w-2xl rounded-sm shadow-2xl p-4 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-[#F0EBE5] pb-4">
         <h2 class="text-2xl font-bold text-[#3D3229]">Paste WhatsApp Message</h2>
         <button on:click={() => isOrderModalOpen = false}><X size={24} /></button>
@@ -741,15 +745,15 @@
 <!-- Modal -->
 {#if isModalOpen}
   <div class="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-[#3D3229]/60 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-sm shadow-2xl">
-      <div class="p-8 border-b border-[#F0EBE5] flex justify-between items-center sticky top-0 bg-white z-10">
-        <h2 class="text-2xl font-bold text-[#3D3229]">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+    <div class="bg-white w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-sm shadow-2xl">
+      <div class="p-4 sm:p-8 border-b border-[#F0EBE5] flex justify-between items-center sticky top-0 bg-white z-10">
+        <h2 class="text-xl sm:text-2xl font-bold text-[#3D3229]">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
         <button on:click={() => isModalOpen = false} class="text-[#8B7D6B] hover:text-[#3D3229]">
           <X size={24} />
         </button>
       </div>
 
-      <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         <div class="space-y-6">
           <div>
             <label for="productName" class="block text-xs font-bold uppercase tracking-widest text-[#8B7D6B] mb-2">Product Name</label>

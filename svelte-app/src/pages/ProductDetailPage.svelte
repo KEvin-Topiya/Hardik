@@ -37,17 +37,17 @@
   keywords="{product.name}, {product.category}, {product.material}, jewelry, Aarti Abhushan"
 />
 
-<div class="min-h-screen bg-[#FFFCF9] pb-24" in:fade>
-  <div class="max-w-7xl mx-auto px-4 py-8">
+<div class="min-h-screen bg-[#FFFCF9] pb-12 sm:pb-24" in:fade>
+  <div class="max-w-7xl mx-auto px-4 py-4 sm:py-8">
     <button 
       on:click={handleBack}
-      class="flex items-center space-x-2 text-[#8B7D6B] hover:text-[#3D3229] transition-colors mb-8 text-xs font-bold uppercase tracking-widest"
+      class="flex items-center space-x-2 text-[#8B7D6B] hover:text-[#3D3229] transition-colors mb-4 sm:mb-8 text-xs font-bold uppercase tracking-widest"
     >
       <ArrowLeft size={16} />
       <span>Back to collection</span>
     </button>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
       <!-- Image / Form Section -->
       <div class="flex flex-col space-y-4">
         <!-- Main Image -->
@@ -87,20 +87,20 @@
       </div>
 
       <!-- Content Section -->
-      <div class="flex flex-col justify-center space-y-12" in:fly={{ x: 20, duration: 600, delay: 200 }}>
-        <div class="space-y-4">
+      <div class="flex flex-col justify-center space-y-6 sm:space-y-12" in:fly={{ x: 20, duration: 600, delay: 200 }}>
+        <div class="space-y-2 sm:space-y-4">
           <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-[#8B7D6B]">{product.category} • {product.material}</p>
-          <h1 class="text-4xl sm:text-6xl font-bold text-[#3D3229] leading-tight tracking-tight">{product.name}</h1>
-          <p class="text-[10px] uppercase font-bold tracking-[0.4em] text-[#8B7D6B] mt-1 mb-4 opacity-70">Ref: FR-00{product.id}</p>
-          <p class="text-2xl font-bold text-[#3D3229]">${product.price.toLocaleString()}</p>
+          <h1 class="text-3xl sm:text-6xl font-bold text-[#3D3229] leading-tight tracking-tight">{product.name}</h1>
+          <p class="text-[10px] uppercase font-bold tracking-[0.4em] text-[#8B7D6B] mt-1 mb-2 sm:mb-4 opacity-70">Ref: FR-00{product.id}</p>
+          <p class="text-2xl font-bold text-[#3D3229]">₹{product.price.toLocaleString()}</p>
         </div>
 
-        <p class="text-[#6B5D50] text-lg font-medium leading-relaxed max-w-xl">
+        <p class="text-[#6B5D50] text-base sm:text-lg font-medium leading-relaxed max-w-xl">
           {product.description}
         </p>
 
         <!-- Specs -->
-        <div class="grid grid-cols-2 gap-8 py-8 border-y border-[#EDE7E0]">
+        <div class="grid grid-cols-2 gap-4 sm:gap-8 py-4 sm:py-8 border-y border-[#EDE7E0]">
           <div class="space-y-1">
             <h4 class="text-[10px] font-bold uppercase tracking-widest text-[#B8A99A]">Weight</h4>
             <p class="text-sm font-bold text-[#3D3229]">{product.weight}</p>

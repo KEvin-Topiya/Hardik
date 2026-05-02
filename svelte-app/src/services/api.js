@@ -1,6 +1,7 @@
 const API_BASE_URL = 'http://localhost:8080/api';
 export const IMAGE_BASE_URL = 'http://localhost:8080/uploads';
 // const API_BASE_URL = '/api';
+// const IMAGE_BASE_URL = '/uploads';
 
 export const getProducts = async (signal) => {
   const response = await fetch(`${API_BASE_URL}/products`, { signal });

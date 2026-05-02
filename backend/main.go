@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -54,15 +55,15 @@ type OrderItem struct {
 }
 
 type Order struct {
-	ID           int            `json:"id" db:"id"`
-	CustomerName string         `json:"customer_name" db:"customer_name"`
-	CustomerPhone string        `json:"customer_phone" db:"customer_phone"`
-	CustomerAddress string      `json:"customer_address" db:"customer_address"`
-	TotalAmount  int            `json:"total_amount" db:"total_amount"`
-	Status       string         `json:"status" db:"status"`
-	RawMessage   string         `json:"raw_message" db:"raw_message"`
-	CreatedAt    time.Time      `json:"created_at" db:"created_at"`
-	Items        []OrderItemDetail `json:"items"`
+	ID              int               `json:"id" db:"id"`
+	CustomerName    string            `json:"customer_name" db:"customer_name"`
+	CustomerPhone   string            `json:"customer_phone" db:"customer_phone"`
+	CustomerAddress string            `json:"customer_address" db:"customer_address"`
+	TotalAmount     int               `json:"total_amount" db:"total_amount"`
+	Status          string            `json:"status" db:"status"`
+	RawMessage      string            `json:"raw_message" db:"raw_message"`
+	CreatedAt       time.Time         `json:"created_at" db:"created_at"`
+	Items           []OrderItemDetail `json:"items"`
 }
 
 type OrderItemDetail struct {
@@ -75,7 +76,8 @@ type OrderItemDetail struct {
 }
 
 type App struct {
-	DB *sqlx.DB
+	DB        *sqlx.DB
+	UploadDir string
 }
 
 func main() {
@@ -111,7 +113,15 @@ func main() {
 	}
 	defer db.Close()
 
-	app := &App{DB: db}
+	uploadDir := os.Getenv("UPLOAD_DIR")
+	if uploadDir == "" {
+		uploadDir = "uploads"
+	}
+
+	app := &App{
+		DB:        db,
+		UploadDir: uploadDir,
+	}
 
 	r := chi.NewRouter()
 
@@ -149,13 +159,12 @@ func main() {
 	})
 
 	// Serve uploaded files
-	workDir, _ := os.Getwd()
-	filesDir := http.Dir(fmt.Sprintf("%s/uploads", workDir))
+	filesDir := http.Dir(app.UploadDir)
 	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(filesDir)))
 
 	// Create uploads directory if it doesn't exist
-	if _, err := os.Stat("uploads"); os.IsNotExist(err) {
-		os.Mkdir("uploads", 0755)
+	if _, err := os.Stat(app.UploadDir); os.IsNotExist(err) {
+		os.MkdirAll(app.UploadDir, 0755)
 	}
 
 	port := os.Getenv("PORT")
@@ -234,7 +243,7 @@ func (app *App) uploadImage(w http.ResponseWriter, r *http.Request) {
 
 	// Generate unique filename
 	filename := fmt.Sprintf("%d-%s", os.Getpid(), handler.Filename)
-	filePath := fmt.Sprintf("uploads/%s", filename)
+	filePath := fmt.Sprintf("%s/%s", app.UploadDir, filename)
 
 	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
